@@ -1,0 +1,24 @@
+`timescale 1ns / 1ps
+
+module reg_file (A, B, C, Aaddr, Baddr, Caddr,Load, clear, clk);
+
+//input Aaddr[3:0], Baddr[3:0], Caddr[3:0];
+//input C[15:0];
+//input load;
+//input clk;
+//input clear;
+//output A[15:0], B[15:0];
+
+int A, B, C, Aaddr, Baddr, Caddr, Load, clear; 
+input clk;
+
+int data[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+if (load = 0)
+  A = data[Aaddr]
+  B = data[Baddr]
+  
+else 
+  data[Caddr] = C
+
+endmodule
