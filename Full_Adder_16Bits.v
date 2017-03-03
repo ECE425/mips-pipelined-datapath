@@ -5,16 +5,15 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Full_Adder_16Bits(output [15:0]S, output V,input [15:0]X,Y, input OP);
-//output C; //carry borrow status 
-//output V; // overflow status
+module Full_Adder_16Bits(output [15:0]S, output V,cout,input [15:0]X,Y, input cin);
 
-
-wire [15:0]c;
+// Wire to Pass Carry Outs 
+wire [14:0]c;
 //c0 carry out bit of fa0->fa1
 //c1 carry out bit of fa1->fa2
 //c2 carry out bit of fa2->fa3
-//c3 carry out bit of fa2->V "overflow"
+//...
+//c15 carry out bit of fa15 to determine->V "overflow"
 
 //wire Y0, Y1, Y2, Y3;
  
@@ -24,9 +23,10 @@ wire [15:0]c;
 // xor(Y3,Y[3],OP);
  //xor(V,c3,c2);
  
- // input x,y,cin 
- //output s,cout
-    FA_Bit fa0 (X[0],Y[0],OP,S[0],c[0]);
+
+ // Full Adder for 16 bits 
+//  FA_Bit(input x,y,cin,output s,cout);
+    FA_Bit fa0 (X[0],Y[0],cin,S[0],c[0]);
     FA_Bit fa1 (X[1],Y[1],c[0],S[1],c[1]);
     FA_Bit fa2 (X[2],Y[2],c[1],S[2],c[2]);
     FA_Bit fa3 (X[3],Y[3],c[2],S[3],c[3]);
@@ -41,5 +41,9 @@ wire [15:0]c;
     FA_Bit fa12 (X[12],Y[12],c[11],S[12],c[12]);
     FA_Bit fa13 (X[13],Y[13],c[12],S[13],c[13]);
     FA_Bit fa14 (X[14],Y[14],c[13],S[14],c[14]);
-    FA_Bit fa15 (X[15],Y[15],c[14],S[15],c[15]);
+    FA_Bit fa15 (X[15],Y[15],c[14],S[15],cout);
+    
+    //OVERFLOW STATUS
+    // v=overflow,c[14]=Cin of last adder,c[15]= Cout of last adder
+    xor overflow(V,c[14],cout);
 endmodule
