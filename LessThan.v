@@ -14,16 +14,16 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module LessThan(S,X,Y);
-output [15:0]S;
+module LessThan(lt,X,Y);
+output lt;// 1 bit Less Than Signal Flag 
 input [15:0] X;
 input [15:0] Y;
 
 
-wire lt;// wire out from LessThanFlag gate to detrmine if it was negative 
+//wire lt;// wire out from LessThanFlag gate to detrmine if it was negative 
 wire V;// wire for overflow of operation 
 wire coutLT;// Final cout for the FA_LessThan 
-
+wire[15:0]S;// output arithmetic value from FA 
 //module Full_Adder_2s_16Bits(output [15:0]S, output V,cout,input [15:0]X,Y, input cin);
 //                                S(16bit), overflow, coutLT, XY(16bits), 1( to do subtraction)
 Full_Adder_2s_16Bits FA_LessThan ( S, V, coutLT, X, Y, 1'b1);

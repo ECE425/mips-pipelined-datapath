@@ -22,11 +22,11 @@ wire [15:0]f1;
 wire [15:0]f2;
 
 not not1(inv_s,s);
-and and1[15:0](f1,a,s,E);
-and and2[15:0](f2,b,inv_s,E);
+and and1[15:0](f1,a,inv_s,E);
+and and2[15:0](f2,b,s,E);
 
 //Output
-or or1(out,f1,f2);
+or or1[15:0](out,f1,f2);
 
 
 endmodule

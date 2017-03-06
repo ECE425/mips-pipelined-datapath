@@ -40,7 +40,7 @@ xor(B[14],Y[14],cin);
 xor(B[15],Y[15],cin);
 
 
-xor(V,c3,c2);
+//xor(V,c3,c2);
  
 
  // Full Adder for 16 bits 
