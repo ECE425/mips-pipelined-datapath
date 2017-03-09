@@ -40,8 +40,8 @@ initial
     // I ONLY UNCLUDED OPCODE FOW NOW, I WILL STILL NEED TO HAVE THE ADDRESS FOR THE OTHERS
     // THIS is wher Rt=Rs*Rd will go 
     // opcod(4bits),RS(4bits),Rt(4bits),Rd(4bits) ADDRESSES
-    instr_mem[0]=16'b0010_0000_0000_0000;//ADD
-    instr_mem[1]=16'b0110_0000_0000_0000;//SUB
+    instr_mem[0]=16'b0010_0110_0010_0100;//ADD
+    instr_mem[1]=16'b0110_0110_0010_0111;//SUB
     instr_mem[2]=16'b0000_0000_0000_0000;//AND
     instr_mem[3]=16'b0001_0000_0000_0000;//OR
     instr_mem[4]=16'b0111_0000_0000_0000;//SLT

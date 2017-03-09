@@ -7,13 +7,18 @@ input reset;
 input data;
 input clk;
 
-always @(posedge clk)
-begin
-    q<=data;
+always @(posedge clk ) //or posedge reset)
+
     
-    if(reset)
-        q<=0;
-end 
+    if(reset) 
+        begin 
+        q<=1'b0;// resets the counter 
+        end
+    else
+        begin
+        q<=data;
+        end
+
 
 endmodule
        

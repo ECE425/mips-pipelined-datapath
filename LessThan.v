@@ -14,8 +14,9 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module LessThan(lt,X,Y);
+module LessThan(lt,S,X,Y);
 output lt;// 1 bit Less Than Signal Flag 
+output [15:0]S;
 input [15:0] X;
 input [15:0] Y;
 

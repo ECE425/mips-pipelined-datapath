@@ -24,6 +24,7 @@
 // 1  1  1  N/A 16'b0
 module ControlUnit(control,opcode);
 output reg[10:0] control;
+// opcode=Instr[15:12]
 input[3:0] opcode;
 
 always @(*)

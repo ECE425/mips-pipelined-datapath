@@ -28,7 +28,7 @@ reg [15:0] Data_Mem [0:63]; // 16 bit address with 64 slots
 
 initial 
     begin 
-    //DUMMY VALUES
+    //DUMMY VALUES (data)
     Data_Mem[0]=16'b0000_0000_0000_0000;
     Data_Mem[1]=16'b0000_0000_0000_0000;
     Data_Mem[2]=16'b0000_0000_0000_0000;

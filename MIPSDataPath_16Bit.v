@@ -13,18 +13,20 @@
 // 
 //THE WHOLE ENCHILADA TOP TOP
 
-module MIPSDataPath_16Bit(clk,reset);
+module MIPSDataPath_16Bit(clk,reset,new_pc,new_pc_offset,new_pc_inc,pc_instr,Instr,control);
 input clk;
 input reset;
-wire [15:0]pc_instr;// current program counter
+
+//wire [15:0]offset;// sign extended offset 
+//***Program Counter Wires
+wire [15:0]pc_instr;// current program counter from PC
 wire [15:0]new_pc;// incremented/modified program counter selected from MUX
-wire [15:0]offset;// sign extended offset 
-
 wire [15:0]new_pc_inc;// incremented program counter by 1
-wire [15:0]new_pc_offset;// incremented program counter and they
-wire pc_V,pc_V_offset;
-wire pc_cout,pc_cout_offset;
+wire [15:0]new_pc_offset;// incremented program counter by offset addition
+wire pc_V,pc_V_offset;// Overflow
+wire pc_cout,pc_cout_offset;//cout 
 
+//***Instruction from Instrcution Memory 
 wire [15:0]Instr;// Output from Instruction Memory, carying insstruction
 
 wire[3:0] Caddr;// address of C ontent
@@ -38,12 +40,13 @@ wire [15:0]C;// output from data memory into File_Reg, this is data not an addre
 wire [10:0] control;
 
 //ALU
-wire [15:0]ALuresult;
+wire [15:0]ALUresult;
 wire cin;// IDK if used 
 wire ALUcout;// cout from alu 
 wire ALUlt;// less than flag
 wire ALUeq;// BNE flag
 wire ALUv;// overflow indicator
+wire ALUgt;// greater than flag
 
 //signExtend
 wire [15:0]SignExtOffset;
@@ -51,8 +54,13 @@ wire [15:0]SignExtOffset;
 //DataMemory
 wire [15:0]ReadData;// Read the data from data memory 
 
+//Branch
+wire BranchFlag;// Out put from AND gate if ALUeq and control[1] are true 
 
-
+//*****Testing Outputs ONLY*****
+output[15:0] new_pc,new_pc_inc,new_pc_offset,pc_instr;
+output[15:0]Instr;
+output[15:0] control;
 //**** ControlUnit****
 //Purpose:
 //input:
@@ -66,14 +74,14 @@ ControlUnit MIPScontrol(control,Instr[15:12]);
 // output: Output will be the current program counter instrcution (pc_instr)and take it to the instruction 
 //         memory and to PCIncrement for increaseing count by 1. 
 //module PC(pc,clk,reset,new_pc);
-//output [15:0]pc input clk input reset input [15:0] new_pc
+//output [15:0]pc, input clk input reset input [15:0] new_pc
 PC ProgramCounter (pc_instr,clk,reset,new_pc);//***new_pc will be the output from a MUX 
 
 // Purpose: Increment PC by 1
 //module Full_Adder_2s_16Bits(output [15:0]S, output V,cout,input [15:0]X,Y, input cin);
 Full_Adder_2s_16Bits PCIncrement (new_pc_inc,pc_V,pc_cout,pc_instr,16'b0000_0000_0000_0001,1'b0);
 // Purpose: Increment PC by 1 and add OFFSET
-Full_Adder_2s_16Bits PCOffset (new_pc_offset,pc_V_offset,pc_cout_offset,new_pc_inc,offset,1'b0);
+Full_Adder_2s_16Bits PCOffset (new_pc_offset,pc_V_offset,pc_cout_offset,new_pc_inc,SignExtOffset,1'b0);
 
 
 //*** 2. Load PC Instruction (pc_instr) into Data memory 
@@ -109,7 +117,7 @@ Mux2X1_4Bit RegDst_Mux(control[0],Instr[7:4],Instr[3:0],1'b1,Caddr);
 //          output A(16bits) B(16bits), input Instr(4bits) Instr(4bits) Caddr, C,  control[9]
 //STILL NEED TO FIX C clr !!!
 //control[9]=load=RegWrite in datapath 
-Register_File RegFile(A,B,Instr[11:8], Instr[7:4], Caddr, "C","clr",control[9], clk);
+Register_File RegFile(A,B,Instr[11:8], Instr[7:4], Caddr, C,control[9], clk);
 
 //Sign Extend 
 //Purpose:
@@ -131,8 +139,8 @@ Mux2X1_16Bit ALUsrc_Mux(control[8],B,SignExtOffset,1'b1,B_ALU_data);
 //Purpose:Select between Read Data 2 (B) from Reg_File or SignExtOffset (16bits)
 //input: 
 //output:
-//module ALU(X,Y,out,Cin,Cout,lt,eq,gt,V,opcod);
-ALU MIPSalu(A,B_ALU_data,ALUresult,"cin",ALUcout,ALUlt,ALUeq,"gt",ALUv,control[6:4]);
+//module ALU(X,Y,out,Cout,lt,eq,gt,V,opcod);
+ALU MIPSalu(A,B_ALU_data,ALUresult,ALUcout,ALUlt,ALUeq,ALUgt,ALUv,control[6:4]);
 //***ALUControl
 
 
@@ -150,6 +158,17 @@ DataMemory DataMem(ReadData,ALUresult,B,control[7],control[2],clk);
 //module Mux2X1_16Bit (s,a,b,E,out);
 Mux2X1_16Bit MemtoReg_Mux(control[3],ALUresult,ReadData,1'b1,C);
 
+//**7. Branch 
+//Purpose:
+//input: The Branch Contorl and the ALUeq fag are And'ed together. If both are true(equal to 1) then a Branch 
+//       flag will be inputed into the Branch-MUX. 
+//output:The output will be the BranchFlag that will go into the Branch_Mux. From there it will choose between 
+//       a regular PC increment(new_pc_inc) or a Sign Extended Offset (SignExtOffset) Added with the PC increment (new_pc_offset).
+//       The final out put will be new_pc which goes to the PC ProgramCounter
+and(BranchFlag,control[1],ALUeq);
 
-//***Branch
+Mux2X1_16Bit BranchORIncrement_Mux(BranchFlag,new_pc_inc,new_pc_offset,1'b1,new_pc);
+
+//***8. Jump 
+// awating implimintation
 endmodule
