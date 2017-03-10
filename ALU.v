@@ -1,28 +1,18 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: ECE 425: Cal Poly Pomona
-// Engineer: Matthew Novoa
-// 
 // Create Date: 02/21/2017 10:03:15 PM: 
 // Module Name: ALU
 // Project Name: RISC_MicroProcessor
 // Target Devices: N/A
 // Tool Versions: 
-// Description: Replicating instruction narrative from "Computer Organization and Design"  
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
+// Description:  
 //////////////////////////////////////////////////////////////////////////////////
 
 
 module ALU(X,Y,out,Cout,lt,eq,gt,V,opcod);
 input[15:0] X, Y;               // 16 bit X and Y inputs
 output[15:0]out;                // result 
-//input Cin;                      // Carry in value
 output Cout;                    // Carryout
 output lt;                      // comparator indicator less than 
 output eq;                      // comparator indicator equal to 
@@ -36,16 +26,6 @@ input [2:0]opcod;               // ALUop input comes from control unit
 wire [15:0] S0,S1;             // Wire outputs from Unsigned Add (S0) and Signed 2's (S1)
 wire [15:0] AND, OR;          // Wire outputs from AND Gate, OR Gate and Carry_Adder_Sub_op
 wire [15:0] LT;               // Wire outputs for Set on LT instruction 
-
-//wire [15:0] Xinvert, Yinvert;
-
-//******Pre-Instruction Operations******
-//Purpose: Invert the signal X or Y (16bits) to be used for branch instruction and 2's comp subtraction 
-//invertor A(Xinvert,X);
-//invertor B(Yinvert,Y);
-//Purpose: Mux will select between inverted x or inverted y; select x and y; 
-//invertMUXop Xin(Xa,X,Xinvert,opcod);              // opcod will need to be defined as specific bits 
-//invertMUXop Yin(Ya,Y,Yinvert,opcod);              // opcod will need to be defined as specific bits
 
 //*****Instruction Operations******
 

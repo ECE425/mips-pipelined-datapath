@@ -1,8 +1,6 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+
 // Create Date: 03/06/2017 12:23:02 PM
 // Design Name: 
 // Module Name: MIPSDataPath_16Bit
@@ -32,9 +30,9 @@ wire [15:0]Instr;// Output from Instruction Memory, carying insstruction
 wire[3:0] Caddr;// address of C ontent
 
 //File Register
-wire [15:0] A,B;// File reg outputs (Read Data 1&2)
-wire [15:0] B_ALU_data;// Output from MUX that selects sign extend or B (Read Data 2)going into ALU
-wire [15:0]C;// output from data memory into File_Reg, this is data not an address
+wire [15:0] A,B;// Register File A output , ALUSrc B output
+wire [15:0] B_reg_file;// Output from Register File Read Data 2
+wire [15:0]C;// output from data memory into Register_File, this is data not an address
 
 //Control Unit
 wire [10:0] control;
@@ -67,10 +65,13 @@ output [15:0] B_reg_file;
 output [15:0] ALUresult;
 output[15:0] ReadData;
 output [15:0] C;
+
 //**** ControlUnit****
-//Purpose:
-//input:
-//output:
+//Purpose: Depending on the Instruction, the control unti will set up the neccessary conrols to execute the instruction
+//input: Takes in 4 bit instruction unique to the instrutions datapath
+//output:The out put will then control the movement of data. Such oupputs will control Mux's writing and reading accesibility. 
+//          10     9      8      7        654          3         2      1      0
+//control{Jump,RegWrite,ALUSrc,MemWrite,ALUOP(3bits),MemtoReg,MemRead,Branch,RegDest}
 ControlUnit MIPScontrol(control,Instr[15:12]);
 
 //*** 1. Fetch Instruction and Increment PC
@@ -116,19 +117,20 @@ Mux2X1_4Bit RegDst_Mux(control[0],Instr[7:4],Instr[3:0],1'b1,Caddr);
 
 
 //*** 4. Register File and Sign Extend
-//Purpose:
-//input:
-//output:
-//module Register_File(A,       B,          Aaddr,            Baddr,     Caddr, C,clr,load, clk);
-//          output A(16bits) B(16bits), input Instr(4bits) Instr(4bits) Caddr, C,  control[9]
-//STILL NEED TO FIX C clr !!!
+//Purpose: The register file will house data that needs to be accessed imedielty. It will output data depending on the address that is inputed. 
+//input: The input will cosist of 2 address reads (A,B). For R/W control unit output control[9] will be asserted for writing data. Data will be
+//       written into Caddr with the Data C coming from ALUresult or Data Memeory. 
+//output:The output will be the data accessed based on the address. The data will be passed into the ALU for computation. 
+//module Register_File(A,       B,          Aaddr,            Baddr,     Caddr, C,   ,load,      clk);
+//          output A(16bits) B(16bits), input Instr(4bits) Instr(4bits) Caddr, C,  control[9], clk 
 //control[9]=load=RegWrite in datapath 
 Register_File RegFile(A,B_reg_file,Instr[11:8], Instr[7:4], Caddr, C,control[9], clk);
 
 //Sign Extend 
-//Purpose:
-//input: 
-//output:
+//Purpose: The sign extend is used to extend the offset from 4 bits to 16 bits to be Added to the 16 bit PC. Based on certain 
+//         instructions such as BNE, a new PC needs to be accessed such that PC=PC+Offset+1. 
+//input: The data that needs to be sign extended to be added to a value (PC) that is the same bit size. 
+//output: The output will be the sign extended data to be computed. 
 //module SignExt_4to16(Dout16,Din4);
 SignExt_4to16 SignExtend(SignExtOffset,Instr[3:0]);
 
@@ -136,36 +138,38 @@ SignExt_4to16 SignExtend(SignExtOffset,Instr[3:0]);
 //*** 5. ALU Source and Execution 
 // AluSrc Selection
 //Purpose:Select between Read Data 2 (B) from Reg_File or SignExtOffset (16bits)
-//input: 
-//output:
+//input: Inputs Read Data 2 or Sign extend. 
+//output:Outout the desired selection based on control[8](ALUsrc) to be inputted into the alu as B 
 //module Mux2X1_16Bit (s,a,b,E,out);
 Mux2X1_16Bit ALUsrc_Mux(control[8],B_reg_file,SignExtOffset,1'b1,B);
 
 //***ALU
-//Purpose:Select between Read Data 2 (B) from Reg_File or SignExtOffset (16bits)
-//input: 
-//output:
+//Purpose:Computation of A and B. Operation will be depending on ALUOP
+//input: The data to be computed A and B 
+//output: Out put the desired result along with the flags. 
 //module ALU(X,Y,out,Cout,lt,eq,gt,V,opcod);
 ALU MIPSalu(A,B,ALUresult,ALUcout,ALUlt,ALUeq,ALUgt,ALUv,control[6:4]);
-//***ALUControl
+
 
 
 //***6. Data Memory and Memory to Register  
-//Purpose:
-//input: 
-//output:
+//Purpose: This device will house the data for later reference and accessed to load onto register file. 
+//input: The data result from the alu will be inputed fro storing or accessing an address. Inputs MemWrite or MemRead will 
+//       will be asserted depeining if we are writing. Note, we can always read. WriteData will be the data to be stored.
+//output: Data from the Data memory will be outputed. No output will be avaliable if data only needs to be written. 
 //module DataMemory(ReadData,ALUresultAddr,WriteData,MemWrite,MemRead,clk);
+//output[15:0]ReadData input [15:0]ALUresultAddr input [15:0]WriteData input MemWrite input MemRead input clk
 DataMemory DataMem(ReadData,ALUresult,B_reg_file,control[7],control[2],clk);
 
 //MemtoReg
-//Purpose:
-//input: 
+//Purpose:Select between data from DataMemory or data from Register File to be passed back into the Register File to be written into. 
+//input: Select between ALUresult or ReadData based on control[3] (MemtoReg)
 //output:Output is C (data) it is passed back into the Reg_File to write the content into Reg_File on Caddr
 //module Mux2X1_16Bit (s,a,b,E,out);
 Mux2X1_16Bit MemtoReg_Mux(control[3],ALUresult,ReadData,1'b1,C);
 
 //**7. Branch 
-//Purpose:
+//Purpose: Determine the new PC if BNE is flagged
 //input: The Branch Contorl and the ALUeq fag are And'ed together. If both are true(equal to 1) then a Branch 
 //       flag will be inputed into the Branch-MUX. 
 //output:The output will be the BranchFlag that will go into the Branch_Mux. From there it will choose between 
@@ -175,6 +179,5 @@ and(BranchFlag,control[1],ALUeq);
 
 Mux2X1_16Bit BranchORIncrement_Mux(BranchFlag,new_pc_inc,new_pc_offset,1'b1,new_pc);
 
-//***8. Jump 
-// awating implimintation
+
 endmodule

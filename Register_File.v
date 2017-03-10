@@ -10,8 +10,6 @@
 // Description: The register file will take in memory addresses and out put data though A and B. It
 //              It is a 16X16 register file. The load fucntion will be enabled to write data into C (register)
 //              based on the Caddr(Address). A clr input will be asserted to clear all the registers.  
-// TODO: 
-// Still nee to incorparate the clear funtion inot the register file and test the simulation. 
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -39,13 +37,14 @@ reg [15:0] register [15:0];
 //putting values in manually 
 initial 
 begin
+// Initial data can be stored in this area with the address decoding the value. 
 register[4'b0110]=16'b0000_0000_0000_0101;// value 5
 register[4'b0010]=16'b0000_0000_0000_0100;// value 4
 register[4'b1100]=16'b0000_0000_0000_0001;//value 1
 end
 
 
-// Dont think Aaddr==4'b000, i think it should be if clr then clear the data.                                       
+// Assign a zero value or output data from certain address                                       
 assign A= (Aaddr== 4'b0000) ? 16'b0000_0000_0000_0000 : register[Aaddr];
 assign B= (Baddr== 4'b0000) ? 16'b0000_0000_0000_0000 : register[Baddr];
 
