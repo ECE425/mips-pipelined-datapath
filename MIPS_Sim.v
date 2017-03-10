@@ -24,11 +24,17 @@ module MIPS_Sim();
 
 reg clk;
 reg reset;
-wire [15:0]new_pc_inc,new_pc_offset,new_pc,pc_instr;
+//wire [15:0]new_pc_inc,new_pc_offset,new_pc;
+wire [15:0]pc_instr;
 wire [15:0] Instr;
 wire [10:0] Control;
+wire [3:0] Caddr;
+wire [15:0] A,B,B_ALU_data;
+wire [15:0] ALUresult;
+wire [15:0] ReadData;
+wire [15:0] C;
 //module MIPSDataPath_16Bit(clk,reset,new_pc,new_pc_offset,new_pc_inc);
-MIPSDataPath_16Bit DataPath(clk,reset,new_pc,new_pc_offset,new_pc_inc,pc_instr,Instr,Control);
+MIPSDataPath_16Bit DataPath(clk,reset,new_pc,new_pc_offset,new_pc_inc,pc_instr,Instr,Control,Caddr,A,B,B_ALU_data,ALUresult,ReadData,C);
 
 initial begin 
 clk=0;
