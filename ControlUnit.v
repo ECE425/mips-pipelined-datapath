@@ -15,7 +15,7 @@
 //  ALUopcode bits [5:3] of opcode
 //T2|T1|T0|Output
 // 0  0  0  ALU_Unsigned_ADD (S0)
-// 0  0  1  ALU_2s_Arith (S1)
+// 0  0  1  ALU_2s_Arith SUB(S1)
 // 0  1  0  ALUand (AND)
 // 0  1  1  ALUor (OR)
 // 1  0  0  ALUlt (Pass out lt flag and arithmetic)(LT)
@@ -30,7 +30,8 @@ input[3:0] opcode;
 always @(*)
 
 case(opcode)
-
+//          10     9      8      7        654          3         2      1      0
+//Control{Jump,RegWrite,ALUSrc,MemWrite,ALUOP(3bits),MemtoReg,MemRead,Branch,RegDest}
     // AND
     0: assign control= 11'b010_0010_0001;
     // OR
@@ -42,9 +43,9 @@ case(opcode)
     // SLT
     7: assign control= 11'b010_0100_0001;
     // LW
-    8: assign control= 11'b011_0001_1100;
+    8: assign control= 11'b011_0000_1100;
     // SW
-    10: assign control= 11'b001_1001_0000;
+    10: assign control= 11'b001_1000_0000;
     // BNE
     14: assign control= 11'b000_0101_0010;
 endcase

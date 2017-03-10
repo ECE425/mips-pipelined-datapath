@@ -38,16 +38,21 @@ reg[15:0] instr_mem [0:63];
 initial 
     begin 
     // I ONLY UNCLUDED OPCODE FOW NOW, I WILL STILL NEED TO HAVE THE ADDRESS FOR THE OTHERS
-    // THIS is wher Rt=Rs*Rd will go 
+    // THIS is where Rt=Rs*Rd will go 
     // opcod(4bits),RS(4bits),Rt(4bits),Rd(4bits) ADDRESSES
-    instr_mem[0]=16'b0010_0110_0010_0100;//ADD
-    instr_mem[1]=16'b0110_0110_0010_0111;//SUB
-    instr_mem[2]=16'b0000_0000_0000_0000;//AND
-    instr_mem[3]=16'b0001_0000_0000_0000;//OR
-    instr_mem[4]=16'b0111_0000_0000_0000;//SLT
-    instr_mem[5]=16'b1000_0000_0000_0000;//LW
-    instr_mem[6]=16'b1010_0000_0000_0000;//SW
-    instr_mem[7]=16'b1110_0000_0000_0000;//BNE
+    //R1[1010]
+    //R2[1011]
+    //R3[1000]
+    //R4[0100]
+    //R5[1100]
+    instr_mem[0]=16'b1000_0110_1010_0000;//LW
+    instr_mem[1]=16'b1000_0110_1011_0001;//LW
+    instr_mem[2]=16'b0010_0000_0000_1000;//ADD
+    instr_mem[3]=16'b0010_0000_1011_0100;//ADD
+    instr_mem[4]=16'b0010_1000_1010_1000;//ADD
+    instr_mem[5]=16'b0110_0100_1100_0100;//SUB
+    instr_mem[6]=16'b1110_0100_0000_0011;//BNE
+    instr_mem[7]=16'b0001_0000_0000_0000;//OR
     instr_mem[8]=16'b0010_0000_0000_0000;
     instr_mem[9]=16'b0010_0000_0000_0000;
     instr_mem[10]=16'b0010_0000_0000_0000;

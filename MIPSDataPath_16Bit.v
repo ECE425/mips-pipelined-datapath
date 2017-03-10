@@ -13,7 +13,7 @@
 // 
 //THE WHOLE ENCHILADA TOP TOP
 
-module MIPSDataPath_16Bit(clk,reset,new_pc,new_pc_offset,new_pc_inc,pc_instr,Instr,control);
+module MIPSDataPath_16Bit(clk,reset,new_pc,new_pc_offset,new_pc_inc,pc_instr,Instr,control,Caddr,A,B,B_reg_file,ALUresult,ReadData, C);
 input clk;
 input reset;
 
@@ -61,6 +61,12 @@ wire BranchFlag;// Out put from AND gate if ALUeq and control[1] are true
 output[15:0] new_pc,new_pc_inc,new_pc_offset,pc_instr;
 output[15:0]Instr;
 output[15:0] control;
+output[3:0] Caddr;
+output [15:0]A,B;
+output [15:0] B_reg_file;
+output [15:0] ALUresult;
+output[15:0] ReadData;
+output [15:0] C;
 //**** ControlUnit****
 //Purpose:
 //input:
@@ -81,7 +87,7 @@ PC ProgramCounter (pc_instr,clk,reset,new_pc);//***new_pc will be the output fro
 //module Full_Adder_2s_16Bits(output [15:0]S, output V,cout,input [15:0]X,Y, input cin);
 Full_Adder_2s_16Bits PCIncrement (new_pc_inc,pc_V,pc_cout,pc_instr,16'b0000_0000_0000_0001,1'b0);
 // Purpose: Increment PC by 1 and add OFFSET
-Full_Adder_2s_16Bits PCOffset (new_pc_offset,pc_V_offset,pc_cout_offset,new_pc_inc,SignExtOffset,1'b0);
+Full_Adder_2s_16Bits PCOffset (new_pc_offset,pc_V_offset,pc_cout_offset,new_pc_inc,SignExtOffset,1'b1);
 
 
 //*** 2. Load PC Instruction (pc_instr) into Data memory 
@@ -117,7 +123,7 @@ Mux2X1_4Bit RegDst_Mux(control[0],Instr[7:4],Instr[3:0],1'b1,Caddr);
 //          output A(16bits) B(16bits), input Instr(4bits) Instr(4bits) Caddr, C,  control[9]
 //STILL NEED TO FIX C clr !!!
 //control[9]=load=RegWrite in datapath 
-Register_File RegFile(A,B,Instr[11:8], Instr[7:4], Caddr, C,control[9], clk);
+Register_File RegFile(A,B_reg_file,Instr[11:8], Instr[7:4], Caddr, C,control[9], clk);
 
 //Sign Extend 
 //Purpose:
@@ -133,14 +139,14 @@ SignExt_4to16 SignExtend(SignExtOffset,Instr[3:0]);
 //input: 
 //output:
 //module Mux2X1_16Bit (s,a,b,E,out);
-Mux2X1_16Bit ALUsrc_Mux(control[8],B,SignExtOffset,1'b1,B_ALU_data);
+Mux2X1_16Bit ALUsrc_Mux(control[8],B_reg_file,SignExtOffset,1'b1,B);
 
 //***ALU
 //Purpose:Select between Read Data 2 (B) from Reg_File or SignExtOffset (16bits)
 //input: 
 //output:
 //module ALU(X,Y,out,Cout,lt,eq,gt,V,opcod);
-ALU MIPSalu(A,B_ALU_data,ALUresult,ALUcout,ALUlt,ALUeq,ALUgt,ALUv,control[6:4]);
+ALU MIPSalu(A,B,ALUresult,ALUcout,ALUlt,ALUeq,ALUgt,ALUv,control[6:4]);
 //***ALUControl
 
 
@@ -149,7 +155,7 @@ ALU MIPSalu(A,B_ALU_data,ALUresult,ALUcout,ALUlt,ALUeq,ALUgt,ALUv,control[6:4]);
 //input: 
 //output:
 //module DataMemory(ReadData,ALUresultAddr,WriteData,MemWrite,MemRead,clk);
-DataMemory DataMem(ReadData,ALUresult,B,control[7],control[2],clk);
+DataMemory DataMem(ReadData,ALUresult,B_reg_file,control[7],control[2],clk);
 
 //MemtoReg
 //Purpose:

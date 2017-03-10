@@ -39,8 +39,9 @@ reg [15:0] register [15:0];
 //putting values in manually 
 initial 
 begin
-register[Aaddr]=16'b0000_0000_0000_0101;// value 5
-register[Baddr]=16'b0000_0000_0000_0100;// value 4
+register[4'b0110]=16'b0000_0000_0000_0101;// value 5
+register[4'b0010]=16'b0000_0000_0000_0100;// value 4
+register[4'b1100]=16'b0000_0000_0000_0001;//value 1
 end
 
 
